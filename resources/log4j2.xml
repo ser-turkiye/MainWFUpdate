@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Supported variables:
+    - agent definition name: ${ctx:agent.name}
+    - agent definition namespace shortname: ${ctx:agent.namespace.short}
+    - agent job id: ${ctx:agent.job.id}
+    - customer name: ${ctx:customer.name}
+-->
+<Configuration status="warn" strict="true" name="AgentLogTemplate">
+
+    <Properties>
+        <Property name="basePath">log</Property>
+    </Properties>
+
+    <Appenders>
+        <Appender type="Console" name="console">
+            <Layout type="PatternLayout" pattern="%-5p %d [%c] - %m%n"/>
+        </Appender>
+    </Appenders>
+
+    <Loggers>
+        <Logger name="org.apache" level="warn"/>
+        <Logger name="org.eclipse" level="warn"/>
+        <Logger name="httpclient" level="warn"/>
+        <Logger name="org.springframework" level="warn"/>
+        <Logger name="com.ser.sedna.client" level="warn"/>
+        <Logger name="com.ser.sedna.clientimpl" level="warn"/>
+        <Logger name="com.ser.wfl" level="warn"/>
+        <Logger name="de.ser.shared" level="warn"/>
+        <Logger name="de.ser.sst.shared" level="warn"/>
+        <!-- ensure the singlejar-loggers are set explicitly to info, in order debug/trace-level is not automatically
+        activated, when the root-logger gets such a loglevel (the singlejar-library produces immense amount of logs, which
+        kills the performance) -->
+        <Logger name="de.ser.swt.shared.singlejar" level="info"/>
+        <Logger name="de.ser.doxis4.agentserver" level="info"/>
+        <Logger name="ser" level="info"/>
+        <Root level="info">
+            <AppenderRef ref="console"/>
+        </Root>
+    </Loggers>
+
+</Configuration>

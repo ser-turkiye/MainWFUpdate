@@ -26,17 +26,14 @@ public class UpdateWFProcIns extends UnifiedAgent {
 
         try {
             ITask task = getEventTask();
-            IReceivers rcvs = task.getReceivers();
             IProcessInstance proi = task.getProcessInstance();
-
-            String taskCreation = (new SimpleDateFormat("yyyyMMdd")).format(task.getCreationDate());
 
             IDocument mainDocument = (IDocument) proi.getMainInformationObject();
             mainDocument.setDescriptorValue("ccmPrjDocWFProcessName", "Main Document Review");
-            mainDocument.setDescriptorValue("ccmPrjDocWFTaskName", task.getName());
-            mainDocument.setDescriptorValue("ccmPrjDocWFTaskCreation", taskCreation);
+            mainDocument.setDescriptorValue("ccmPrjDocWFTaskName", "Completed");
+            mainDocument.setDescriptorValue("ccmPrjDocWFTaskCreation", "");
             mainDocument.setDescriptorValue("ccmPrjDocWFTaskRecipients",
-                (rcvs != null ? rcvs.getWorkbasket().getName() : "")
+               ""
             );
 
             mainDocument.commit();

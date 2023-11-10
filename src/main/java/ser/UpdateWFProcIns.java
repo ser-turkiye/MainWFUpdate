@@ -31,7 +31,7 @@ public class UpdateWFProcIns extends UnifiedAgent {
             IDocument mainDocument = (IDocument) proi.getMainInformationObject();
             mainDocument.setDescriptorValue("ccmPrjDocWFProcessName", "Main Document Review");
             mainDocument.setDescriptorValue("ccmPrjDocWFTaskName", "Completed");
-            mainDocument.setDescriptorValue("ccmPrjDocWFTaskCreation", "");
+            mainDocument.setDescriptorValueTyped("ccmPrjDocWFTaskCreation", task.getCreationDate());
             mainDocument.setDescriptorValue("ccmPrjDocWFTaskRecipients",
                ""
             );

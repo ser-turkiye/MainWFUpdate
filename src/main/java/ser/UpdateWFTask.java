@@ -3,13 +3,13 @@ package ser;
 import com.ser.blueline.IDocument;
 import com.ser.blueline.IDocumentServer;
 import com.ser.blueline.ISession;
-import com.ser.blueline.bpm.IBpmService;
-import com.ser.blueline.bpm.IProcessInstance;
-import com.ser.blueline.bpm.IReceivers;
-import com.ser.blueline.bpm.ITask;
+import com.ser.blueline.bpm.*;
 import de.ser.doxis4.agentserver.UnifiedAgent;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 
 public class UpdateWFTask extends UnifiedAgent {
@@ -25,18 +25,27 @@ public class UpdateWFTask extends UnifiedAgent {
 
         try {
             ITask task = getEventTask();
-            IReceivers rcvs = task.getReceivers();
             IProcessInstance proi = task.getProcessInstance();
 
             String taskCreation = (task.getCreationDate() == null ? "" : (new SimpleDateFormat("yyyyMMdd")).format(task.getCreationDate()));
 
+            //task.getCurrentWorkbasket().getName();
+            Collection<ITask> tasks = proi.findTasks(TaskStatus.READY);
+            List<String> wlst = new ArrayList<>();
+            for(ITask ftask : tasks){
+                if(ftask.getCurrentWorkbasket() == null){continue;}
+                wlst.add(ftask.getCurrentWorkbasket().getName());
+            }
+
             IDocument mainDocument = (IDocument) proi.getMainInformationObject();
+
             mainDocument.setDescriptorValue("ccmPrjDocWFProcessName", "Main Document Review");
             mainDocument.setDescriptorValue("ccmPrjDocWFTaskName", task.getName());
             mainDocument.setDescriptorValue("ccmPrjDocWFTaskCreation", taskCreation);
             mainDocument.setDescriptorValue("ccmPrjDocWFTaskRecipients",
-                (rcvs != null ? rcvs.getWorkbasket().getName() : "")
+                String.join(";", wlst)
             );
+
 
             mainDocument.commit();
             System.out.println("Tested.");

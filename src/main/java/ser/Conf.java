@@ -20,7 +20,7 @@ public class Conf {
     }
     public static class MainWFUpdate {
         public static final String MainPath = "C:/tmp2/bulk/mainwfupdate";
-        public static final String WebBase = "http://localhost/webcube/";
+        public static final String WebBase = "http://doxis-web/webcube/";
     }
     public static class ClassIDs{
         public static final String Template = "b9cf43d1-a4d3-482f-9806-44ae64c6139d";

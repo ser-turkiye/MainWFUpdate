@@ -106,7 +106,7 @@ public class UpdateWFTask extends UnifiedAgent {
             System.out.println("Exception       : " + e.getMessage());
             System.out.println("    Class       : " + e.getClass());
             System.out.println("    Stack-Trace : " + e.getStackTrace() );
-            return resultError("Exception : " + e.getMessage());
+            return resultRestart("Exception : " + e.getMessage(),10);
         }
 
         System.out.println("Finished");

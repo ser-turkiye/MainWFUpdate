@@ -41,8 +41,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 public class Utils {
-
-
     public static String updateCell(String str, JSONObject bookmarks){
         StringBuffer rtr1 = new StringBuffer();
         String tmp = str + "";

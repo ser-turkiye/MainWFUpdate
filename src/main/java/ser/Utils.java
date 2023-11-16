@@ -9,10 +9,12 @@ import com.ser.blueline.metaDataComponents.IArchiveClass;
 import com.ser.blueline.metaDataComponents.IStringMatrix;
 import com.ser.foldermanager.IFolder;
 import com.ser.foldermanager.INode;
+
 import com.spire.xls.FileFormat;
 import com.spire.xls.Workbook;
 import com.spire.xls.Worksheet;
 import com.spire.xls.core.spreadsheet.HTMLOptions;
+
 import jakarta.activation.DataHandler;
 import jakarta.activation.DataSource;
 import jakarta.activation.FileDataSource;
@@ -21,6 +23,7 @@ import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeBodyPart;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.internet.MimeMultipart;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.poi.common.usermodel.HyperlinkType;
@@ -41,7 +44,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 public class Utils {
-    public static String updateCell(String str, JSONObject bookmarks){
+    static String updateCell(String str, JSONObject bookmarks){
         StringBuffer rtr1 = new StringBuffer();
         String tmp = str + "";
         Pattern ptr1 = Pattern.compile( "\\{([\\w\\.]+)\\}" );
@@ -59,7 +62,7 @@ public class Utils {
 
         return tmp;
     }
-    public static String exportDocument(IDocument document, String exportPath, String fileName) throws IOException {
+    static String exportDocument(IDocument document, String exportPath, String fileName) throws IOException {
         String rtrn ="";
         IDocumentPart partDocument = document.getPartDocument(document.getDefaultRepresentation() , 0);
         String fName = (!fileName.isEmpty() ? fileName : partDocument.getFilename());
@@ -80,7 +83,7 @@ public class Utils {
         }
         return rtrn;
     }
-    public static String saveDocReviewExcel(String templatePath, Integer shtIx, String tpltSavePath, JSONObject pbks) throws IOException {
+    static String saveDocReviewExcel(String templatePath, Integer shtIx, String tpltSavePath, JSONObject pbks) throws IOException {
 
         FileInputStream tist = new FileInputStream(templatePath);
         XSSFWorkbook twrb = new XSSFWorkbook(tist);
@@ -129,7 +132,7 @@ public class Utils {
         if(informationObjects.length < 1) {return null;}
         return (IDocument) informationObjects[0];
     }
-    public static String convertExcelToHtml(String excelPath, String htmlPath)  {
+    static String convertExcelToHtml(String excelPath, String htmlPath)  {
         Workbook workbook = new Workbook();
         workbook.loadFromFile(excelPath);
         Worksheet sheet = workbook.getWorksheets().get(0);

@@ -35,6 +35,8 @@ public class UpdateWFTask extends UnifiedAgent {
         try {
             this.helper = new ProcessHelper(ses);
             ITask task = getEventTask();
+            if(task.getName().equals("Base task")){return resultSuccess("There is no mail 'Base task'");}
+
             IProcessInstance proi = task.getProcessInstance();
 
             (new File(Conf.MainWFUpdate.MainPath)).mkdir();
@@ -59,6 +61,10 @@ public class UpdateWFTask extends UnifiedAgent {
             }
 
             IDocument mainDocument = (IDocument) proi.getMainInformationObject();
+            if(mainDocument == null){return resultSuccess("No-Main document");}
+
+            String docNo = mainDocument.getDescriptorValue(Conf.Descriptors.DocNumber, String.class);
+            if(docNo == null || docNo.isEmpty()){return resultSuccess("Passed successfully");}
 
             mainDocument.setDescriptorValue("ccmPrjDocWFProcessName", "Main Document Review");
             mainDocument.setDescriptorValue("ccmPrjDocWFTaskName", task.getName());
@@ -77,11 +83,14 @@ public class UpdateWFTask extends UnifiedAgent {
             }
 
             JSONObject dbks = new JSONObject();
-            dbks.put("DocNo", mainDocument.getDescriptorValue(Conf.Descriptors.DocNumber, String.class));
+            dbks.put("DocNo", docNo);
             dbks.put("RevNo", mainDocument.getDescriptorValue(Conf.Descriptors.Revision, String.class));
             dbks.put("Title", mainDocument.getDisplayName());
             dbks.put("Task", task.getName());
-            dbks.put("DoxisLink", Conf.MainWFUpdate.WebBase + helper.getTaskURL(proi.getID()));
+
+
+            JSONObject mcfg = Utils.getMailConfig(ses, srv, mtpn);
+            dbks.put("DoxisLink", mcfg.getString("webBase") + helper.getTaskURL(task.getID()));
 
             String tplMailPath = Utils.exportDocument(mtpl, Conf.MainWFUpdate.MainPath, mtpn + "[" + uniqueId + "]");
             String mailExcelPath = Utils.saveDocReviewExcel(tplMailPath, Conf.MainWFUpdateSheetIndex.Mail,

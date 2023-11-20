@@ -145,7 +145,7 @@ public class Utils {
         return new String(Files.readAllBytes(Paths.get(path)));
     }
     static IStringMatrix getMailConfigMatrix(ISession ses, IDocumentServer srv, String mtpn) throws Exception {
-        IStringMatrix rtrn = srv.getStringMatrix("MailConfig" + (!mtpn.isEmpty() ? "." + mtpn : ""), ses);
+        IStringMatrix rtrn = srv.getStringMatrix("CCM_MAIL_CONFIG", ses);
         if (rtrn == null) throw new Exception("MailConfig Global Value List not found");
         return rtrn;
     }

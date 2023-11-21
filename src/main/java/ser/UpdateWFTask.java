@@ -66,7 +66,9 @@ public class UpdateWFTask extends UnifiedAgent {
             String docNo = mainDocument.getDescriptorValue(Conf.Descriptors.DocNumber, String.class);
             if(docNo == null || docNo.isEmpty()){return resultSuccess("Passed successfully");}
 
-            mainDocument.setDescriptorValue("ccmPrjDocWFProcessName", "Main Document Review");
+
+
+            mainDocument.setDescriptorValue("ccmPrjDocWFProcessName", proi.getDisplayName());
             mainDocument.setDescriptorValue("ccmPrjDocWFTaskName", task.getName());
             mainDocument.setDescriptorValue("ccmPrjDocWFTaskCreation", taskCreation);
             mainDocument.setDescriptorValue("ccmPrjDocWFTaskRecipients",

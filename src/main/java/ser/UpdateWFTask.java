@@ -27,12 +27,17 @@ public class UpdateWFTask extends UnifiedAgent {
         if (getEventTask() == null)
             return resultError("Null Document object");
 
-        com.spire.license.LicenseProvider.setLicenseKey(Conf.Licences.SPIRE_XLS);
 
         ses = getSes();
         srv = ses.getDocumentServer();
         bpm = getBpm();
         try {
+
+            JSONObject scfg = Utils.getSystemConfig(ses);
+            if(scfg.has("LICS.SPIRE_XLS")){
+                com.spire.license.LicenseProvider.setLicenseKey(scfg.getString("LICS.SPIRE_XLS"));
+            }
+
             this.helper = new ProcessHelper(ses);
             ITask task = getEventTask();
             if(task.getName().equals("Base task")){return resultSuccess("There is no mail 'Base task'");}
@@ -64,9 +69,11 @@ public class UpdateWFTask extends UnifiedAgent {
             if(mainDocument == null){return resultSuccess("No-Main document");}
 
             String docNo = mainDocument.getDescriptorValue(Conf.Descriptors.DocNumber, String.class);
-            if(docNo == null || docNo.isEmpty()){return resultSuccess("Passed successfully");}
+            docNo = (docNo == null ? "" : docNo);
+            if(docNo.isEmpty()){return resultSuccess("Passed successfully");}
 
-
+            String revNo = mainDocument.getDescriptorValue(Conf.Descriptors.Revision, String.class);
+            revNo = (revNo == null ? "" : revNo);
 
             mainDocument.setDescriptorValue("ccmPrjDocWFProcessName", proi.getDisplayName());
             mainDocument.setDescriptorValue("ccmPrjDocWFTaskName", task.getName());
@@ -86,7 +93,7 @@ public class UpdateWFTask extends UnifiedAgent {
 
             JSONObject dbks = new JSONObject();
             dbks.put("DocNo", docNo);
-            dbks.put("RevNo", mainDocument.getDescriptorValue(Conf.Descriptors.Revision, String.class));
+            dbks.put("RevNo", revNo);
             dbks.put("Title", mainDocument.getDisplayName());
             dbks.put("Task", task.getName());
 

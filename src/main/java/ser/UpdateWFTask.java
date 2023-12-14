@@ -128,7 +128,11 @@ public class UpdateWFTask extends UnifiedAgent {
                 mail.put("Subject", "WF-Task > " + dbks.getString("DocNo") + " / " + dbks.getString("RevNo"));
                 mail.put("BodyHTMLFile", mailHtmlPath);
 
-                Utils.sendHTMLMail(ses, srv, mtpn, mail);
+                try{
+                    Utils.sendHTMLMail(ses, srv, mtpn, mail);
+                } catch (Exception ex){
+                    System.out.println("EXCP [Send-Mail] : " + ex.getMessage());
+                }
             }
 
             System.out.println("Tested.");

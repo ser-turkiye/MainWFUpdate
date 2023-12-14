@@ -22,7 +22,7 @@ class TEST_UpdateWFProcIns {
     void testForAgentResult() {
         def agent = new UpdateWFProcIns();
 
-        binding["AGENT_EVENT_OBJECT_CLIENT_ID"] = "ST03BPM248966319a-f756-48c3-9eb5-9c2c8898ee30182023-11-08T13:54:59.194Z016"
+        binding["AGENT_EVENT_OBJECT_CLIENT_ID"] = "SP03BPM246d2b835e-6f55-4bbb-835a-40f9ee7f8d2c182023-12-04T12:25:57.492Z00"
 
         def result = (AgentExecutionResult) agent.execute(binding.variables)
         assert result.resultCode == 0

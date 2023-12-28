@@ -69,6 +69,26 @@ public class UpdateWFTask extends UnifiedAgent {
                 }
             }
             */
+            IDocument mainDocument = (IDocument) proi.getMainInformationObject();
+            if(mainDocument == null){return resultSuccess("No-Main document");}
+
+            String docNo = mainDocument.getDescriptorValue(Conf.Descriptors.DocNumber, String.class);
+            docNo = (docNo == null ? "" : docNo);
+            if(docNo.isEmpty()){return resultSuccess("Passed successfully");}
+
+            String revNo = mainDocument.getDescriptorValue(Conf.Descriptors.Revision, String.class);
+            revNo = (revNo == null ? "" : revNo);
+
+            String taskCreation = (task.getCreationDate() == null ? "" : (new SimpleDateFormat("yyyyMMdd")).format(task.getCreationDate()));
+
+            mainDocument.setDescriptorValue("ccmPrjDocWFProcessName", proi.getDisplayName());
+            mainDocument.setDescriptorValue("ccmPrjDocWFTaskName", task.getName());
+            mainDocument.setDescriptorValue("ccmPrjDocWFTaskCreation", taskCreation);
+            mainDocument.setDescriptorValue("ccmPrjDocWFTaskRecipients",
+                    String.join(";", wlst)
+            );
+            mainDocument.commit();
+
             IWorkbasket wbsk = task.getCurrentWorkbasket();
             if(wbsk != null) {
                 if (!wbsk.getName().isEmpty()) {
@@ -81,26 +101,6 @@ public class UpdateWFTask extends UnifiedAgent {
             }
 
             if(mlst.size() == 0){return resultSuccess("No mail address : " + (wbsk !=null ? wbsk.getFullName() : "-No Workbasket-"));}
-
-            String taskCreation = (task.getCreationDate() == null ? "" : (new SimpleDateFormat("yyyyMMdd")).format(task.getCreationDate()));
-
-            IDocument mainDocument = (IDocument) proi.getMainInformationObject();
-            if(mainDocument == null){return resultSuccess("No-Main document");}
-
-            String docNo = mainDocument.getDescriptorValue(Conf.Descriptors.DocNumber, String.class);
-            docNo = (docNo == null ? "" : docNo);
-            if(docNo.isEmpty()){return resultSuccess("Passed successfully");}
-
-            String revNo = mainDocument.getDescriptorValue(Conf.Descriptors.Revision, String.class);
-            revNo = (revNo == null ? "" : revNo);
-
-            mainDocument.setDescriptorValue("ccmPrjDocWFProcessName", proi.getDisplayName());
-            mainDocument.setDescriptorValue("ccmPrjDocWFTaskName", task.getName());
-            mainDocument.setDescriptorValue("ccmPrjDocWFTaskCreation", taskCreation);
-            mainDocument.setDescriptorValue("ccmPrjDocWFTaskRecipients",
-                String.join(";", wlst)
-            );
-            mainDocument.commit();
 
             String uniqueId = UUID.randomUUID().toString();
 

@@ -1,9 +1,6 @@
 package ser;
 
-import com.ser.blueline.IDocument;
-import com.ser.blueline.IDocumentServer;
-import com.ser.blueline.ISession;
-import com.ser.blueline.IUser;
+import com.ser.blueline.*;
 import com.ser.blueline.bpm.*;
 import de.ser.doxis4.agentserver.UnifiedAgent;
 import org.json.JSONObject;
@@ -43,8 +40,16 @@ public class UpdateWFTask extends UnifiedAgent {
             if(task.getName().equals("Base task")){return resultSuccess("There is no mail 'Base task'");}
 
             IProcessInstance proi = task.getProcessInstance();
-            (new File(Conf.MainWFUpdate.MainPath)).mkdir();
+            (new File(Conf.MainWFUpdate.MainPath)).mkdirs();
 
+            String prjn = proi.getDescriptorValue(Conf.Descriptors.ProjectNo, String.class);
+            if(prjn.isEmpty()){
+                throw new Exception("Project no is empty.");
+            }
+            IInformationObject prjt = Utils.getProjectWorkspace(prjn, helper);
+            if(prjt == null){
+                throw new Exception("Project not found [" + prjn + "].");
+            }
 
             //task.getCurrentWorkbasket().getName();
             List<String> wlst = new ArrayList<>();
@@ -98,11 +103,12 @@ public class UpdateWFTask extends UnifiedAgent {
             mainDocument.commit();
 
             String uniqueId = UUID.randomUUID().toString();
-            String prjn = proi.getDescriptorValue(Conf.Descriptors.ProjectNo, String.class);
+
             String mtpn = "UPDATE_WF_MAIL";
-            IDocument mtpl = Utils.getTemplateDocument(prjn, mtpn, helper);
+            IDocument mtpl = Utils.getTemplateDocument(prjt, mtpn);
             if(mtpl == null){
-                throw new Exception("Template-Document [ " + mtpn + " ] not found.");
+                return resultSuccess("No-Mail Template");
+                //throw new Exception("Template-Document [ " + mtpn + " ] not found.");
             }
 
             JSONObject dbks = new JSONObject();

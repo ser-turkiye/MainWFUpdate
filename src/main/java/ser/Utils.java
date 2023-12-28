@@ -7,6 +7,8 @@ import com.ser.blueline.bpm.ITask;
 import com.ser.blueline.bpm.IWorkbasket;
 import com.ser.blueline.metaDataComponents.IArchiveClass;
 import com.ser.blueline.metaDataComponents.IStringMatrix;
+import com.ser.foldermanager.IElement;
+import com.ser.foldermanager.IElements;
 import com.ser.foldermanager.IFolder;
 import com.ser.foldermanager.INode;
 
@@ -141,7 +143,49 @@ public class Utils {
         tost.close();
         return tpltSavePath;
     }
-    static IDocument getTemplateDocument(String prjNo, String tpltName, ProcessHelper helper)  {
+
+    public static boolean hasDescriptor(IInformationObject infObj, String dscn) throws Exception {
+        IValueDescriptor[] vds = infObj.getDescriptorList();
+        for(IValueDescriptor vd : vds){
+            if(vd.getName().equals(dscn)){return true;}
+        }
+        return false;
+    }
+    static IInformationObject getProjectWorkspace(String prjn, ProcessHelper helper) {
+        StringBuilder builder = new StringBuilder();
+        builder.append("TYPE = '").append(Conf.ClassIDs.ProjectWorkspace).append("'")
+                .append(" AND ")
+                .append(Conf.DescriptorLiterals.PrjCardCode).append(" = '").append(prjn).append("'");
+        String whereClause = builder.toString();
+        System.out.println("Where Clause: " + whereClause);
+
+        IInformationObject[] informationObjects = helper.createQuery(new String[]{Conf.Databases.ProjectWorkspace} , whereClause , "", 1);
+        if(informationObjects.length < 1) {return null;}
+        return informationObjects[0];
+    }
+    static IDocument getTemplateDocument(IInformationObject info, String tpltName) throws Exception {
+        List<INode> nods = ((IFolder) info).getNodesByName("Templates");
+        for(INode node : nods){
+            IElements elms = node.getElements();
+
+            for(int i=0;i<elms.getCount2();i++) {
+                IElement nelement = elms.getItem2(i);
+                String edocID = nelement.getLink();
+                IInformationObject tplt = info.getSession().getDocumentServer().getInformationObjectByID(edocID, info.getSession());
+                if(tplt == null){continue;}
+
+                if(!hasDescriptor(tplt, Conf.Descriptors.TemplateName)){continue;}
+
+                String etpn = tplt.getDescriptorValue(Conf.Descriptors.TemplateName, String.class);
+                if(etpn == null || !etpn.equals(tpltName)){continue;}
+
+                return (IDocument) tplt;
+            }
+        }
+        return null;
+    }
+
+    static IDocument getTemplateDocument_old(String prjNo, String tpltName, ProcessHelper helper)  {
         StringBuilder builder = new StringBuilder();
         builder.append("TYPE = '").append(Conf.ClassIDs.Template).append("'")
                 .append(" AND ")
@@ -151,7 +195,7 @@ public class Utils {
         String whereClause = builder.toString();
         System.out.println("Where Clause: " + whereClause);
 
-        IInformationObject[] informationObjects = helper.createQuery(new String[]{Conf.Databases.Company} , whereClause , 1);
+        IInformationObject[] informationObjects = helper.createQuery(new String[]{Conf.Databases.Company} , whereClause , "",1);
         if(informationObjects.length < 1) {return null;}
         return (IDocument) informationObjects[0];
     }
@@ -213,6 +257,10 @@ public class Utils {
         if(pars.has("To")){
             mailTo = pars.getString("To");
         }
+
+        if(sender.isEmpty()){throw new Exception("Mail Sender is empty");}
+        if(mailTo.isEmpty()){throw new Exception("Mail To is empty");}
+
         if(pars.has("CC")){
             mailCC = pars.getString("CC");
         }

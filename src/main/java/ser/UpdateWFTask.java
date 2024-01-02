@@ -35,40 +35,26 @@ public class UpdateWFTask extends UnifiedAgent {
                 com.spire.license.LicenseProvider.setLicenseKey(scfg.getString("LICS.SPIRE_XLS"));
             }
 
-            this.helper = new ProcessHelper(ses);
             ITask task = getEventTask();
-            if(task.getName().equals("Base task")){return resultSuccess("There is no mail 'Base task'");}
+            if(task.getAutoCompletionRule() != null){return resultSuccess("Auto Completion Rule ...");}
+
+            IWorkbasket wbsk = task.getCurrentWorkbasket();
+            if(wbsk == null){return resultSuccess("No-Workbasket ...");}
 
             IProcessInstance proi = task.getProcessInstance();
-            (new File(Conf.MainWFUpdate.MainPath)).mkdirs();
 
-            String prjn = proi.getDescriptorValue(Conf.Descriptors.ProjectNo, String.class);
-            if(prjn.isEmpty()){
-                throw new Exception("Project no is empty.");
-            }
-            IInformationObject prjt = Utils.getProjectWorkspace(prjn, helper);
-            if(prjt == null){
-                throw new Exception("Project not found [" + prjn + "].");
-            }
-
-            //task.getCurrentWorkbasket().getName();
             List<String> wlst = new ArrayList<>();
             List<String> mlst = new ArrayList<>();
-            /*
-            Collection<ITask> tasks = proi.findTasks(TaskStatus.READY);
-            for(ITask ftask : tasks){
-                if(ftask.getCurrentWorkbasket() == null){continue;}
-                IWorkbasket wbsk = ftask.getCurrentWorkbasket();
-                if(!wbsk.getName().isEmpty()){
+            if(wbsk != null) {
+                if (!wbsk.getName().isEmpty()) {
                     wlst.add(wbsk.getName());
                 }
-
                 String wuem = wbsk.getNotifyEMail();
-                if(wuem != null && !wuem.isEmpty()){
+                if (wuem != null && !wuem.isEmpty()) {
                     mlst.add(wuem);
                 }
             }
-            */
+
             IDocument mainDocument = (IDocument) proi.getMainInformationObject();
             if(mainDocument == null){return resultSuccess("No-Main document");}
 
@@ -89,16 +75,39 @@ public class UpdateWFTask extends UnifiedAgent {
             );
             mainDocument.commit();
 
-            IWorkbasket wbsk = task.getCurrentWorkbasket();
-            if(wbsk != null) {
-                if (!wbsk.getName().isEmpty()) {
+            this.helper = new ProcessHelper(ses);
+            //if(task.getName().equals("Base task")){return resultSuccess("There is no mail 'Base task'");}
+
+            (new File(Conf.MainWFUpdate.MainPath)).mkdirs();
+
+            String prjn = proi.getDescriptorValue(Conf.Descriptors.ProjectNo, String.class);
+            if(prjn.isEmpty()){
+                throw new Exception("Project no is empty.");
+            }
+            IInformationObject prjt = Utils.getProjectWorkspace(prjn, helper);
+            if(prjt == null){
+                throw new Exception("Project not found [" + prjn + "].");
+            }
+
+            //task.getCurrentWorkbasket().getName();
+            /*
+            Collection<ITask> tasks = proi.findTasks(TaskStatus.READY);
+            for(ITask ftask : tasks){
+                if(ftask.getCurrentWorkbasket() == null){continue;}
+                IWorkbasket wbsk = ftask.getCurrentWorkbasket();
+                if(!wbsk.getName().isEmpty()){
                     wlst.add(wbsk.getName());
                 }
+
                 String wuem = wbsk.getNotifyEMail();
-                if (wuem != null && !wuem.isEmpty()) {
+                if(wuem != null && !wuem.isEmpty()){
                     mlst.add(wuem);
                 }
             }
+            */
+
+
+
 
             if(mlst.size() == 0){return resultSuccess("No mail address : " + (wbsk !=null ? wbsk.getFullName() : "-No Workbasket-"));}
 

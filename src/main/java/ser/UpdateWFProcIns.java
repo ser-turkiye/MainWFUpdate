@@ -9,6 +9,8 @@ import com.ser.blueline.bpm.IProcessInstance;
 import com.ser.blueline.bpm.IReceivers;
 import com.ser.blueline.bpm.ITask;
 import de.ser.doxis4.agentserver.UnifiedAgent;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -16,17 +18,21 @@ import java.util.Objects;
 
 
 public class UpdateWFProcIns extends UnifiedAgent {
-
-    ISession ses;
-    IDocumentServer srv;
-    IBpmService bpm;
-    private ProcessHelper helper;
+    Logger log = LogManager.getLogger();
+    private ProcessHelper processHelper;
     @Override
     protected Object execute() {
         if (getEventTask() == null)
             return resultError("Null Document object");
 
+        Utils.session = getSes();
+        Utils.bpm = getBpm();
+        Utils.server = Utils.session.getDocumentServer();
+        Utils.loadDirectory(Conf.Paths.MainPath);
+
         try {
+            processHelper = new ProcessHelper(Utils.session);
+
             ITask task = getEventTask();
             IProcessInstance proi = task.getProcessInstance();
 
@@ -55,18 +61,18 @@ public class UpdateWFProcIns extends UnifiedAgent {
                 getSes().getDocumentServer().updateMutability(getSes(), mainDocument, IMutability.IMMUTABLE);
             }*/
 
-            System.out.println("Tested.");
+            log.info("Tested.");
 
         } catch (Exception e) {
             //throw new RuntimeException(e);
-            System.out.println("Exception       : " + e.getMessage());
-            System.out.println("    Class       : " + e.getClass());
-            System.out.println("    Stack-Trace : " + e.getStackTrace() );
+            log.error("Exception       : " + e.getMessage());
+            log.error("    Class       : " + e.getClass());
+            log.error("    Stack-Trace : " + e.getStackTrace() );
             return resultRestart("Exception : " + e.getMessage(), 10);
 
         }
 
-        System.out.println("Finished");
+        log.info("Finished");
         return resultSuccess("Ended successfully");
     }
 }

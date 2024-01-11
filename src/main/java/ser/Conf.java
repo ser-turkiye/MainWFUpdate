@@ -1,11 +1,5 @@
 package ser;
 
-import org.json.JSONObject;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 public class Conf {
 
     public static class MainWFUpdateSheetIndex {
@@ -15,7 +9,7 @@ public class Conf {
         public static final String Company = "D_QCON";
         public static final String ProjectWorkspace = "PRJ_FOLDER";
     }
-    public static class MainWFUpdate {
+    public static class Paths {
         public static final String MainPath = "C:/tmp2/bulk/mainwfupdate";
     }
     public static class ClassIDs{

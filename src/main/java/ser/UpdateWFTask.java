@@ -3,21 +3,19 @@ package ser;
 import com.ser.blueline.*;
 import com.ser.blueline.bpm.*;
 import de.ser.doxis4.agentserver.UnifiedAgent;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
 
 public class UpdateWFTask extends UnifiedAgent {
-
-    ISession ses;
-    IDocumentServer srv;
-    IBpmService bpm;
+    Logger log = LogManager.getLogger();
     private ProcessHelper helper;
     @Override
     protected Object execute() {
@@ -25,12 +23,14 @@ public class UpdateWFTask extends UnifiedAgent {
             return resultError("Null Document object");
 
 
-        ses = getSes();
-        srv = ses.getDocumentServer();
-        bpm = getBpm();
+        Utils.session = getSes();
+        Utils.bpm = getBpm();
+        Utils.server = Utils.session.getDocumentServer();
+        Utils.loadDirectory(Conf.Paths.MainPath);
+
         try {
 
-            JSONObject scfg = Utils.getSystemConfig(ses);
+            JSONObject scfg = Utils.getSystemConfig();
             if(scfg.has("LICS.SPIRE_XLS")){
                 com.spire.license.LicenseProvider.setLicenseKey(scfg.getString("LICS.SPIRE_XLS"));
             }
@@ -75,10 +75,9 @@ public class UpdateWFTask extends UnifiedAgent {
             );
             mainDocument.commit();
 
-            this.helper = new ProcessHelper(ses);
-            //if(task.getName().equals("Base task")){return resultSuccess("There is no mail 'Base task'");}
+            this.helper = new ProcessHelper(Utils.session);
 
-            (new File(Conf.MainWFUpdate.MainPath)).mkdirs();
+            (new File(Conf.Paths.MainPath)).mkdirs();
 
             String prjn = proi.getDescriptorValue(Conf.Descriptors.ProjectNo, String.class);
             if(prjn.isEmpty()){
@@ -89,26 +88,6 @@ public class UpdateWFTask extends UnifiedAgent {
                 throw new Exception("Project not found [" + prjn + "].");
             }
 
-            //task.getCurrentWorkbasket().getName();
-            /*
-            Collection<ITask> tasks = proi.findTasks(TaskStatus.READY);
-            for(ITask ftask : tasks){
-                if(ftask.getCurrentWorkbasket() == null){continue;}
-                IWorkbasket wbsk = ftask.getCurrentWorkbasket();
-                if(!wbsk.getName().isEmpty()){
-                    wlst.add(wbsk.getName());
-                }
-
-                String wuem = wbsk.getNotifyEMail();
-                if(wuem != null && !wuem.isEmpty()){
-                    mlst.add(wuem);
-                }
-            }
-            */
-
-
-
-
             if(mlst.size() == 0){return resultSuccess("No mail address : " + (wbsk !=null ? wbsk.getFullName() : "-No Workbasket-"));}
 
             String uniqueId = UUID.randomUUID().toString();
@@ -117,7 +96,6 @@ public class UpdateWFTask extends UnifiedAgent {
             IDocument mtpl = Utils.getTemplateDocument(prjt, mtpn);
             if(mtpl == null){
                 return resultSuccess("No-Mail Template");
-                //throw new Exception("Template-Document [ " + mtpn + " ] not found.");
             }
 
             JSONObject dbks = new JSONObject();
@@ -127,14 +105,14 @@ public class UpdateWFTask extends UnifiedAgent {
             dbks.put("Task", task.getName());
 
 
-            JSONObject mcfg = Utils.getMailConfig(ses, srv, mtpn);
+            JSONObject mcfg = Utils.getMailConfig();
             dbks.put("DoxisLink", mcfg.getString("webBase") + helper.getTaskURL(task.getID()));
 
-            String tplMailPath = Utils.exportDocument(mtpl, Conf.MainWFUpdate.MainPath, mtpn + "[" + uniqueId + "]");
+            String tplMailPath = Utils.exportDocument(mtpl, Conf.Paths.MainPath, mtpn + "[" + uniqueId + "]");
             String mailExcelPath = Utils.saveDocReviewExcel(tplMailPath, Conf.MainWFUpdateSheetIndex.Mail,
-                    Conf.MainWFUpdate.MainPath + "/" + mtpn + "[" + uniqueId + "].xlsx", dbks
+                    Conf.Paths.MainPath + "/" + mtpn + "[" + uniqueId + "].xlsx", dbks
             );
-            String mailHtmlPath = Utils.convertExcelToHtml(mailExcelPath, Conf.MainWFUpdate.MainPath + "/" + mtpn + "[" + uniqueId + "].html");
+            String mailHtmlPath = Utils.convertExcelToHtml(mailExcelPath, Conf.Paths.MainPath + "/" + mtpn + "[" + uniqueId + "].html");
 
             if(mlst.size() > 0) {
                 JSONObject mail = new JSONObject();
@@ -144,23 +122,23 @@ public class UpdateWFTask extends UnifiedAgent {
                 mail.put("BodyHTMLFile", mailHtmlPath);
 
                 try{
-                    Utils.sendHTMLMail(ses, srv, mtpn, mail);
+                    Utils.sendHTMLMail(mail);
                 } catch (Exception ex){
-                    System.out.println("EXCP [Send-Mail] : " + ex.getMessage());
+                    log.info("EXCP [Send-Mail] : " + ex.getMessage());
                 }
             }
 
-            System.out.println("Tested.");
+            log.info("Tested.");
 
         } catch (Exception e) {
             //throw new RuntimeException(e);
-            System.out.println("Exception       : " + e.getMessage());
-            System.out.println("    Class       : " + e.getClass());
-            System.out.println("    Stack-Trace : " + e.getStackTrace() );
+            log.error("Exception       : " + e.getMessage());
+            log.error("    Class       : " + e.getClass());
+            log.error("    Stack-Trace : " + e.getStackTrace() );
             return resultRestart("Exception : " + e.getMessage(),10);
         }
 
-        System.out.println("Finished");
+        log.info("Finished");
         return resultSuccess("Ended successfully");
     }
 }

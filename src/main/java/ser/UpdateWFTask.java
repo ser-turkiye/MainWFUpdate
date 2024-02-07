@@ -11,6 +11,7 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 
@@ -73,6 +74,14 @@ public class UpdateWFTask extends UnifiedAgent {
             mainDocument.setDescriptorValue("ccmPrjDocWFTaskRecipients",
                     String.join(";", wlst)
             );
+
+            if(Objects.equals(task.getCode(), "Step04")){
+                Long prevTaskID = getEventTask().getPreviousTaskNumericID();
+                ITask prevTask = getEventTask().getProcessInstance().findTaskByNumericID(getEventTask().getPreviousTaskNumericID());
+                String decisionCode = prevTask.getDecision().getCode();
+                mainDocument.setDescriptorValue("ccmPrjDocApprCode",decisionCode);
+            }
+
             mainDocument.commit();
 
             this.helper = new ProcessHelper(Utils.session);

@@ -76,9 +76,11 @@ public class UpdateWFTask extends UnifiedAgent {
             );
 
             if(Objects.equals(task.getCode(), "Step04")){
-                ITask prevTask = getEventTask().getProcessInstance().findTaskByNumericID(getEventTask().getPreviousTaskNumericID());
-                String decisionCode = prevTask.getDecision().getCode();
-                mainDocument.setDescriptorValue("ccmPrjDocApprCode",decisionCode);
+                if(getEventTask().getPreviousTaskNumericID()!=null) {
+                    ITask prevTask = getEventTask().getProcessInstance().findTaskByNumericID(getEventTask().getPreviousTaskNumericID());
+                    String decisionCode = prevTask.getDecision().getCode();
+                    mainDocument.setDescriptorValue("ccmPrjDocApprCode", decisionCode);
+                }
             }
 
             mainDocument.commit();

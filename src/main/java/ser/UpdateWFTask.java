@@ -23,6 +23,8 @@ public class UpdateWFTask extends UnifiedAgent {
         if (getEventTask() == null)
             return resultError("Null Document object");
 
+        log.info("Event Task starting..Task ID:" + getEventTask().getID());
+        log.info("Event Task starting..Task Code:" + getEventTask().getCode());
 
         Utils.session = getSes();
         Utils.bpm = getBpm();
@@ -35,8 +37,9 @@ public class UpdateWFTask extends UnifiedAgent {
             if(scfg.has("LICS.SPIRE_XLS")){
                 com.spire.license.LicenseProvider.setLicenseKey(scfg.getString("LICS.SPIRE_XLS"));
             }
-
             ITask task = getEventTask();
+
+            log.info("Event Task autocompletion rule.." + task.getAutoCompletionRule());
             if(task.getAutoCompletionRule() != null){return resultSuccess("Auto Completion Rule ...");}
 
             IWorkbasket wbsk = task.getCurrentWorkbasket();
@@ -59,6 +62,7 @@ public class UpdateWFTask extends UnifiedAgent {
             IDocument mainDocument = (IDocument) proi.getMainInformationObject();
             if(mainDocument == null){return resultSuccess("No-Main document");}
 
+            log.info("Main Document is.." + mainDocument.getID());
             String docNo = mainDocument.getDescriptorValue(Conf.Descriptors.DocNumber, String.class);
             docNo = (docNo == null ? "" : docNo);
             if(docNo.isEmpty()){return resultSuccess("Passed successfully");}
@@ -76,14 +80,19 @@ public class UpdateWFTask extends UnifiedAgent {
             );
 
             if(Objects.equals(task.getCode(), "Step04")){
+                log.info("Approval Code updating start..prev. task ID null?" + task.getPreviousTaskNumericID());
+                log.info("Approval Code updating start..prev. event task ID null?" + getEventTask().getPreviousTaskNumericID());
                 if(getEventTask().getPreviousTaskNumericID()!=null) {
                     ITask prevTask = getEventTask().getProcessInstance().findTaskByNumericID(getEventTask().getPreviousTaskNumericID());
                     String decisionCode = prevTask.getDecision().getCode();
+                    log.info("Approval Code updated.. decisionCode IS:" + decisionCode);
                     mainDocument.setDescriptorValue("ccmPrjDocApprCode", decisionCode);
+                    log.info("Approval Code updated.. APPR CODE IS:" + mainDocument.getDescriptorValue("ccmPrjDocApprCode"));
                 }
             }
 
             mainDocument.commit();
+            log.info("Approval Code update committed..");
 
             this.helper = new ProcessHelper(Utils.session);
 

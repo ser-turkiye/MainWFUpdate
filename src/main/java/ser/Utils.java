@@ -367,4 +367,16 @@ public class Utils {
         Transport.send(message);
 
     }
+    public ITask getEmptyApprCodeByTask(ProcessHelper helper) throws Exception {
+        StringBuilder builder = new StringBuilder();
+        builder.append("TYPE = '").append(Conf.ClassIDs.ReviewMain).append("'")
+                .append(" AND ")
+                .append("CCMPRJDOCAPPRCODE").append(" IS NULL");
+        String whereClause = builder.toString();
+        log.info("Where Clause: " + whereClause);
+        IInformationObject[] informationObjects = helper.createQuery(new String[]{Conf.Databases.Process} , whereClause , "", 1, false);
+        if(informationObjects.length < 1) throw new Exception("No Hits found for query: " + whereClause);
+        //if(informationObjects.length > 1) throw new Exception("Multiple hits found for query: " + whereClause);
+        return (ITask) informationObjects[0];
+    }
 }

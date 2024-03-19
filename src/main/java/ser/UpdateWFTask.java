@@ -60,11 +60,11 @@ public class UpdateWFTask extends UnifiedAgent {
                         log.info("Approval Code updated.. decisionCode IS:" + decisionCode);
                         mainDocument.setDescriptorValue("ccmPrjDocApprCode", decisionCode);
                         log.info("Approval Code updated.. APPR CODE IS:" + mainDocument.getDescriptorValue("ccmPrjDocApprCode"));
+                        mainDocument.commit();
+                        log.info("UpdateWFTask maindoc committed..111");
                     }
                 }
             }
-            mainDocument.commit();
-            log.info("UpdateWFTask maindoc committed..111");
 
             if(task.getAutoCompletionRule() != null){return resultSuccess("Auto Completion Rule ...");}
 

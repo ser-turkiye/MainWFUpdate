@@ -149,7 +149,7 @@ public class UpdateWFTask extends UnifiedAgent {
                 mail.put("BodyHTMLFile", mailHtmlPath);
 
                 try{
-                    Utils.sendHTMLMail(mail);
+                    Utils.sendHTMLMail(mail,null);
                 } catch (Exception ex){
                     log.info("EXCP [Send-Mail] : " + ex.getMessage());
                 }

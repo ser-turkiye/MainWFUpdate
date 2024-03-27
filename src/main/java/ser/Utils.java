@@ -373,7 +373,6 @@ public class Utils {
         rtrn = rtrn.replace("\uFEFF", "");
         rtrn = rtrn.replace("ï»¿", "");
         rtrn = rtrn.replace("ï»¿ï»¿", "");
-        rtrn = rtrn.replace("?", "");
         return rtrn;
     }
     static void sendHTMLMailOLD(JSONObject pars) throws Exception {

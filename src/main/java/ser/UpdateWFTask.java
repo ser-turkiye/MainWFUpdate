@@ -10,6 +10,7 @@ import org.json.JSONObject;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 
 public class UpdateWFTask extends UnifiedAgent {
@@ -102,11 +103,46 @@ public class UpdateWFTask extends UnifiedAgent {
             mainDocument.commit();
             log.info("UpdateWFTask maindoc committed...222");
 
+
+            Date tbgn = null, tend = new Date();
+            if(task.getReadyDate() != null){
+                tbgn = task.getReadyDate();
+            }
+            long durd  = 0L;
+            double durh  = 0.0;
+            if(tend != null && tbgn != null) {
+                long diff = (tend.getTime() > tbgn.getTime() ? tend.getTime() - tbgn.getTime() : tbgn.getTime() - tend.getTime());
+                durd = TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS);
+                durh = ((TimeUnit.MINUTES.convert(diff, TimeUnit.MILLISECONDS) - (durd * 24 * 60)) * 100 / 60) / 100d;
+            }
+            String rcvf = "", rcvo = "";
+            if(task.getPreviousWorkbasket() != null){
+                rcvf = task.getPreviousWorkbasket().getFullName();
+            }
+            if(tbgn != null){
+                rcvo = (new SimpleDateFormat("dd-MM-yyyy HH:mm")).format(tbgn);
+            }
+            String prjn = "",  mdno = "", mdrn = "", mdnm = "";
+            if(mainDocument != null &&  Utils.hasDescriptor((IInformationObject) mainDocument, Conf.Descriptors.ProjectNo)){
+                prjn = mainDocument.getDescriptorValue(Conf.Descriptors.ProjectNo, String.class);
+            }
+            if(mainDocument != null &&  Utils.hasDescriptor((IInformationObject) mainDocument, Conf.Descriptors.DocNumber)){
+                mdno = mainDocument.getDescriptorValue(Conf.Descriptors.DocNumber, String.class);
+            }
+            if(mainDocument != null &&  Utils.hasDescriptor((IInformationObject) mainDocument, Conf.Descriptors.Revision)){
+                mdrn = mainDocument.getDescriptorValue(Conf.Descriptors.Revision, String.class);
+            }
+            if(mainDocument != null &&  Utils.hasDescriptor((IInformationObject) mainDocument, Conf.Descriptors.Name)){
+                mdnm = mainDocument.getDescriptorValue(Conf.Descriptors.Name, String.class);
+            }
+
+
+
             this.helper = new ProcessHelper(Utils.session);
 
             (new File(Conf.Paths.MainPath)).mkdirs();
 
-            String prjn = proi.getDescriptorValue(Conf.Descriptors.ProjectNo, String.class);
+            //String prjn = proi.getDescriptorValue(Conf.Descriptors.ProjectNo, String.class);
             if(prjn.isEmpty()){
                 throw new Exception("Project no is empty.");
             }
@@ -130,6 +166,10 @@ public class UpdateWFTask extends UnifiedAgent {
             dbks.put("RevNo", revNo);
             dbks.put("Title", mainDocument.getDisplayName());
             dbks.put("Task", task.getName());
+            dbks.put("DocName", (mdnm != null  ? mdnm : ""));
+            dbks.put("ReceivedOn", (rcvo != null ? rcvo : ""));
+            dbks.put("ProcessTitle", (proi != null ? proi.getDisplayName() : ""));
+            dbks.put("ProjectNo", (prjn != null  ? prjn : ""));
 
 
             JSONObject mcfg = Utils.getMailConfig();

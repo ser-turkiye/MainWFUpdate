@@ -22,6 +22,7 @@ public class Conf {
         public static final String ProjectNo = "ccmPRJCard_code";
         public static final String DocNumber = "ccmPrjDocNumber";
         public static final String Revision = "ccmPrjDocRevision";
+        public static final String Name = "ObjectName";
         public static final String TemplateName = "ObjectNumberExternal";
 
     }

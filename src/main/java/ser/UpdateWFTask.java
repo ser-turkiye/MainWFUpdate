@@ -185,7 +185,8 @@ public class UpdateWFTask extends UnifiedAgent {
                 JSONObject mail = new JSONObject();
 
                 mail.put("To", String.join(";", mlst));
-                mail.put("Subject", "WF-Task > " + dbks.getString("DocNo") + " / " + dbks.getString("RevNo"));
+                //mail.put("Subject", "WF-Task > " + dbks.getString("DocNo") + " / " + dbks.getString("RevNo"));
+                mail.put("Subject", "New Doc. > " + task.getName() + " - " + dbks.getString("DocNo") + " / " + dbks.getString("RevNo"));
                 mail.put("BodyHTMLFile", mailHtmlPath);
 
                 try{

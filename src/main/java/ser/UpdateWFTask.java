@@ -99,7 +99,14 @@ public class UpdateWFTask extends UnifiedAgent {
             mainDocument.setDescriptorValue("ccmPrjDocWFTaskRecipients",
                     String.join(";", wlst)
             );
-
+            if(Utils.hasDescriptor(proi, "ProcessID") && proi.getDescriptorValue("ProcessID") == null) {
+                proi.setDescriptorValue("ProcessID", proi.getID());
+                proi.commit();
+            }
+            if(Utils.hasDescriptor(task, "TaskID") && task.getDescriptorValue("TaskID") == null) {
+                task.setDescriptorValue("TaskID", task.getID());
+                task.commit();
+            }
             mainDocument.commit();
             log.info("UpdateWFTask maindoc committed...222");
 
